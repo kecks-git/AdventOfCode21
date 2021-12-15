@@ -2,8 +2,33 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <map>
 
 using namespace std;
+
+class SevenSegment
+{
+    public: 
+    string Num;
+
+    bool includes(SevenSegment & b)
+    {
+        for (auto &i: b.Num)
+        {
+            if(Num.find(i) == string::npos)
+                return 0;
+        }
+        return 1;
+    }
+};
+
+bool operator==(SevenSegment a, SevenSegment b)
+{
+    if(a.includes(b) && b.includes(a))
+        return 1;
+    else
+        return 0;
+}
 
 int main()
 {
@@ -30,6 +55,7 @@ int main()
             }
         }
     }
+    // Part 1
     int Result = 0;
     for ( int i = 0 ; i < Input.size(); i++ )
     {
@@ -39,7 +65,20 @@ int main()
                 ++Result;
         }                
     }
-    cout << Result << endl;
+    cout << "Part 1: " << Result << endl;
 
+    // Part 2
+    for ( int i = 0 ; i < Input.size(); i++ )
+    {
+        map<SevenSegment, int> Num;
+        // Create a map of numbers of 0-9
+        for ( int j = 0; j < Input[i].size()-4 ; j++ )
+        {
+        }
+        // Get 4 result numbers 
+        for ( int j = 10; j < Input[i].size()-4 ; j++ )
+        {
+        }                      
+    }
     return 0;
 }
