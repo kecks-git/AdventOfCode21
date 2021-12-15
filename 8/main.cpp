@@ -11,6 +11,7 @@ class SevenSegment
     public: 
     string Num;
 
+    SevenSegment(string num) : Num (num){};
     bool includes(SevenSegment & b)
     {
         for (auto &i: b.Num)
@@ -28,6 +29,30 @@ bool operator==(SevenSegment a, SevenSegment b)
         return 1;
     else
         return 0;
+}
+
+void CreateMap(map<SevenSegment, int>& Num, vector<string>& Str)
+{
+    for(int i = 0; i < 10; ++i)
+    {
+        if(Str[i].size() == 2)
+            Num.insert(pair<SevenSegment, int>(Str[i], 1));
+        else if(Str[i].size() == 3)
+            Num.insert(pair<SevenSegment, int>(Str[i], 7));
+        else if(Str[i].size() == 4)
+            Num.insert(pair<SevenSegment, int>(Str[i], 4));
+        else if(Str[i].size() == 7)
+            Num.insert(pair<SevenSegment, int>(Str[i], 8));
+    }
+    for(int i = 0; i < 10; ++i)
+    {
+        if(Str[i].size() == 6)
+        {
+            SevenSegment Six {Str[i]};
+            if()
+        }
+    }
+    return;
 }
 
 int main()
@@ -74,6 +99,7 @@ int main()
         // Create a map of numbers of 0-9
         for ( int j = 0; j < Input[i].size()-4 ; j++ )
         {
+            CreateMap(Num, Input[i]);
         }
         // Get 4 result numbers 
         for ( int j = 10; j < Input[i].size()-4 ; j++ )
