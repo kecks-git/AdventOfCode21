@@ -2,59 +2,38 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <map>
+#include <math.h>
 
 using namespace std;
 
-class SevenSegment
+// Write included and == functions for std::string 
+// characters of std::string a are included in std::string b
+bool included(string &a, string & b)
 {
-    public: 
-    string Num;
-
-    SevenSegment(string num) : Num (num){};
-    bool includes(SevenSegment & b)
+    for (auto &i: a)
     {
-        for (auto &i: b.Num)
-        {
-            if(Num.find(i) == string::npos)
-                return 0;
-        }
-        return 1;
+        if(b.find(i) == string::npos)
+            return 0;
     }
-};
+    return 1;
+}
 
-bool operator==(SevenSegment a, SevenSegment b)
+// std::string contains the same letters, w/o considering order
+bool operator==(string a,string b)
 {
-    if(a.includes(b) && b.includes(a))
+    if(included(a, b) && included(b, a))
         return 1;
     else
         return 0;
 }
 
-void CreateMap(map<SevenSegment, int>& Num, vector<string>& Str)
-{
-    for(int i = 0; i < 10; ++i)
-    {
-        if(Str[i].size() == 2)
-            Num.insert(pair<SevenSegment, int>(Str[i], 1));
-        else if(Str[i].size() == 3)
-            Num.insert(pair<SevenSegment, int>(Str[i], 7));
-        else if(Str[i].size() == 4)
-            Num.insert(pair<SevenSegment, int>(Str[i], 4));
-        else if(Str[i].size() == 7)
-            Num.insert(pair<SevenSegment, int>(Str[i], 8));
-    }
-    for(int i = 0; i < 10; ++i)
-    {
-        if(Str[i].size() == 6)
-        {
-            SevenSegment Six {Str[i]};
-            if()
-        }
-    }
-    return;
-}
-
+// Strategy (Part 2)
+// - Get result for each number (PartResult) and sum them up: Result2
+// - //Start looking directly at the four output digits
+// - Get a vector of all values
+// - Some can be immediately defined
+// - Other need to follow the rules as described in the SevenSegmentsLogic file
+// - Then define all the output digits and sum up the numbers
 int main()
 {
     fstream ifs("input");
@@ -81,30 +60,80 @@ int main()
         }
     }
     // Part 1
-    int Result = 0;
+    int Result1 = 0;
     for ( int i = 0 ; i < Input.size(); i++ )
     {
         for ( int j = 10; j < Input[i].size() ; j++ )
         {
             if(Input[i][j].size() == 2 ||Input[i][j].size() == 3||Input[i][j].size() == 4||Input[i][j].size() == 7)
-                ++Result;
+                ++Result1;
         }                
     }
-    cout << "Part 1: " << Result << endl;
+    cout << "Part 1: " << Result1 << endl;
 
+    int Result2 = 0;
     // Part 2
+    // For each line
     for ( int i = 0 ; i < Input.size(); i++ )
     {
-        map<SevenSegment, int> Num;
-        // Create a map of numbers of 0-9
-        for ( int j = 0; j < Input[i].size()-4 ; j++ )
+        vector<string> SevenSegments {};
+        // Reserve doesn't initialize the values, resize() would
+        SevenSegments.resize(10);
+        // For each digit...
+        for ( int j = 0; j < 10; j++ )
         {
-            CreateMap(Num, Input[i]);
+            if(Input[i][j].size() == 2)
+                SevenSegments[1] = Input[i][j];
+            else if(Input[i][j].size() == 3)
+                SevenSegments[7] = Input[i][j];
+            else if(Input[i][j].size() == 4)
+                SevenSegments[4] = Input[i][j];
+            else if(Input[i][j].size() == 7)
+                SevenSegments[8] = Input[i][j];
         }
-        // Get 4 result numbers 
-        for ( int j = 10; j < Input[i].size()-4 ; j++ )
+        for ( int j = 0; j < 10; j++ )
         {
-        }                      
+            if(Input[i][j].size() == 6)
+            {
+                if(!included(SevenSegments[1], Input[i][j]))
+                    SevenSegments[6] = Input[i][j];
+                else if(!included(SevenSegments[4], Input[i][j]))
+                    SevenSegments[0] = Input[i][j];
+                else
+                    SevenSegments[9] = Input[i][j];
+            }
+        }
+        for ( int j = 0; j < 10; j++ )
+        {
+            if(Input[i][j].size() == 5)
+            {
+                if(included(SevenSegments[1], Input[i][j]))
+                    SevenSegments[3] = Input[i][j];
+                else if(included(Input[i][j], SevenSegments[6]))
+                    SevenSegments[5] = Input[i][j];
+                else
+                    SevenSegments[2] = Input[i][j];
+            }
+        }
+        int PartResult = 0;
+        for ( int j = 10; j < Input[i].size(); j++ )
+        {
+            // TODO: more efficient lookup
+            for(int k = 0; k < 10; ++k)
+            {
+                if(Input[i][j] == SevenSegments[k])
+                {
+                    // cout << "Found : " << Input[i][j] << " == " << Input[i][k] << endl;
+                    // cout << "k = " << k << endl;
+                    PartResult += k * pow(10, Input[i].size()-j-1);
+                }
+            }
+        }
+        // for (auto & Seg : SevenSegments)
+        //     cout << Seg << endl;
+        Result2 += PartResult; 
+        // cout << "Part 2." << i << ": " << PartResult << endl;
     }
+    cout << "Part 2: " << Result2 << endl;
     return 0;
 }
