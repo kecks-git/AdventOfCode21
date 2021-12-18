@@ -3,8 +3,10 @@
 #include <utility>
 #include <fstream>
 #include <cstdlib>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 void addLineToMap(vector<vector<int>> &Map, pair<int,int> Start, pair<int,int> End)
 {
@@ -84,13 +86,14 @@ vector<pair<pair<int,int>, pair<int,int>>> getLines()
         while (c[i] != ','){++i;}
         End.first = stoi(c.substr(0, i));
         End.second = stoi(c.substr(i+1));
-        Lines.push_back(make_pair(Start, End));
+        Lines.emplace_back(Start, End);
     }
     return Lines;
 }
 
 int main()
 {
+    auto Start = high_resolution_clock::now();
     //Create Map Karte of given size
     vector<vector<int>> Map {0};
     vector<int> Line = {};
@@ -124,6 +127,10 @@ int main()
                 ++DangerPoints;
         }
     }
+    auto Stop = high_resolution_clock::now();
+
     cout << "Danger Points: " << DangerPoints << endl;
+    
+    cout << "Runtime: " << duration_cast<microseconds>(Stop -Start).count() << " ms"<< endl;
     return 0;
 }
