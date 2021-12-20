@@ -4,10 +4,9 @@
 #include <string>
 #include <stack>
 #include <map>
-#include <initializer_list>
+#include <bits/stdc++.h>
 
 using namespace std;
-using namespace std::literals::string_literals;
 
 map<char, int> Points1 {{')', 3}, {']', 57}, {'}', 1'197}, {'>', 25'137}};
 map<char, int> Points2 {{'(', 1}, {'[', 2}, {'{', 3}, {'<', 4}};
@@ -40,10 +39,16 @@ bool isCounterpart(const char Opening, const char Closing)
         return true;
     return false;
 }
+template<typename T>
+T middle (vector<T>& v)
+{
+    sort(v.begin(), v.end());
+    return v[v.size()/2];
+}
 
 int main()
 {
-    fstream ifs("SampleInput");
+    fstream ifs("input");
     
     vector<string> Braces;
     string Line = {};
@@ -55,11 +60,13 @@ int main()
     }
 
     //Part 1    
-    stack<char> Stack {};
     int ErrorScore1 = 0;
-        cout << Braces.size() << endl;
+    cout << Braces.size() << endl;
 
-    for (auto it = Braces.begin(); it != Braces.end();)    {
+    for (auto it = Braces.begin(); it != Braces.end();)    
+    {
+        stack<char> Stack {};
+        bool Deleted = false;
         for(auto &j : *it)
         {
             if(isOpening(j))
@@ -70,19 +77,25 @@ int main()
                 {
                     ErrorScore1 += Points1.find(j)->second;
                     Braces.erase(it);
+                    cout << "Delete " << *it<< endl;
+                    Deleted = true;
                     break;
                 }
                 Stack.pop();
             }
         }
-        ++it;
+        if(!Deleted)
+            ++it;
     }
+    for(auto &i :Braces)
+        cout << i << endl;
     cout << Braces.size() << endl;
     cout << "Part 1: " << ErrorScore1 << endl;
     //Part 2
-    int Errorscore2 = 0;
+    vector<long long> Autocompl = {};
     for (auto it = Braces.begin(); it != Braces.end();++it)    {
-        int Partscore = 0;
+        long long Partscore = 0;
+        stack<char> Stack {};
         for(auto &j : *it)
         {
             if(isOpening(j))
@@ -98,8 +111,10 @@ int main()
             Stack.pop();
         }
         cout << endl;
-        Errorscore2 += Partscore;
+        if(Partscore)
+            Autocompl.push_back(Partscore);
+        cout << Partscore << endl;
     }
-    cout << "Part 2: " << Errorscore2 << endl;
+    cout << "Part 2: " << middle(Autocompl) << endl;
     return 0;
 }
