@@ -14,7 +14,6 @@ using tInstructions = vector<tInstruction>;
 
 void fold(tPaper& Paper, const tInstruction& Instruction)
 {
-    cout << Instruction.first << Instruction.second << endl;
     if(Instruction.first == "x")
     {
         sort(Paper.begin(), Paper.end(), [](const tPoint& x, const tPoint& y){ return x.first < y.first; });
@@ -47,7 +46,6 @@ int main()
     {
         Input.clear();
         getline(ifs, Input);
-        cout << Input << endl;
         if (Input == "")
             continue;
         if(Input[0] == 'f')
@@ -56,13 +54,9 @@ int main()
             Paper.push_back({stoi(Input.substr(0, Input.find(','))), stoi(Input.substr(Input.find(',')+1))});
     }
 
-    for(auto &i : Paper)
-        cout << i.first << " " << i.second << endl;
-    for(auto &i : Instructions)
-        cout << i.first << " " << i.second << endl;
     // Part 1
     // fold(Paper, Instructions[0]);
-    
+
     // Part 2
     for(auto &i : Instructions)
         fold(Paper, i);
@@ -76,12 +70,12 @@ int main()
     }
 
     vector<string> Line;
-    Line.resize(MaxX+1, "_");
+    Line.resize(MaxX+1, " ");
     vector<vector<string>> Output;
     Output.resize(MaxY+1, Line);
 
     for(auto &i : Paper)
-        Output.at(i.second).at(i.first) = "o";
+        Output.at(i.second).at(i.first) = "#";
 
     for(auto &i : Output)
     {
