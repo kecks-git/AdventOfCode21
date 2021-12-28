@@ -1,51 +1,71 @@
 #include <iostream>
 #include <fstream>
-#include <list>
-#include <string>
-#include <tuple>
 #include <vector>
-#include <algorithm>
+#include <iostream>
+#include <set>
+#include <utility>
 #include <map>
 
 using namespace std;
-using tInstructions = vector<tuple<char, char, char>>;
+using tPolymer = map<string, uint64_t>;
+using tInstructions = map<string, char>;
 
-void doInsertion(list<char>& Polymer, const tInstructions& Instructions)
+void printPolymer(const tPolymer& Polymer)
 {
-    // list<char>::iterator
-    for (auto p = next(Polymer.begin(), 1); p != Polymer.end(); ++p)
-    {
-        for(int i = 0; i < Instructions.size(); ++i)
-        {
-            if(*(prev(p, 1)) == get<0>(Instructions.at(i)))
-            {
-                if(*p == get<1>(Instructions.at(i)))
-                {
-                    Polymer.insert(p, get<2>(Instructions.at(i)));
-                    break;
-                }
-            }
-        }
-    }
+    for (const auto& [key, value] : Polymer) 
+        std::cout << key << " = " << value << "; ";
+    cout << endl;
     return;
 }
 
-pair<long long, long long> getMostLeastCommon(list<char> p)
+tPolymer addToPolymer(tPolymer& Polymer, const string toInsert, uint64_t Num = 1)
 {
-    long long max = 0;
-    char MostCommon = -1;
-    map<char,int> m;
-    for (auto vi = p.begin(); vi != p.end(); vi++) 
+    if(Polymer.find(toInsert) != Polymer.end())
+        Polymer[toInsert] += Num;
+    else
+        Polymer.insert({toInsert, Num});
+    return Polymer;
+}
+
+void doInsertionRound(tPolymer& Polymer, tInstructions& Instructions)
+{
+    // list<char>::iterator
+    tPolymer NewPolymer = Polymer;
+    for(auto it = Polymer.begin(); it != Polymer.end(); ++it)
     {
-        m[*vi]++;
-        if (m[*vi] > max) 
+        char New = Instructions[it->first];
+        string New1 = it->first.substr(0,1) + New;
+        string New2 = New + it->first.substr(1,1);
+        addToPolymer(NewPolymer, New1, it->second);
+        addToPolymer(NewPolymer, New2, it->second);
+        NewPolymer[it->first] -= it->second;
+    }
+    Polymer = NewPolymer;
+    return;
+}
+
+pair<uint64_t, uint64_t> getMostLeastCommon(tPolymer p)
+{
+    uint64_t max = 0;
+    string MostCommon {};
+    map<string,uint64_t> m;
+    for (auto it = p.begin(); it != p.end(); it++) 
+    {
+        m[it->first.substr(0,1)] += it->second;
+        m[it->first.substr(1,1)] += it->second;
+        if (m[it->first.substr(0,1)] > max) 
         {
-            max = m[*vi]; 
-            MostCommon = *vi;
+            max = m[it->first.substr(0,1)]; 
+            MostCommon = it->first.substr(0,1);
+        }
+        if (m[it->first.substr(1,1)] > max) 
+        {
+            max = m[it->first.substr(1,1)]; 
+            MostCommon = it->first.substr(1,1);
         }
     }
-    long long min = m.begin()->second;
-    char LeastCommon = m.begin()->first;
+    uint64_t min = m.begin()->second;
+    string LeastCommon = m.begin()->first;
     for(auto &i : m)
     {
         if(i.second < min)
@@ -54,14 +74,14 @@ pair<long long, long long> getMostLeastCommon(list<char> p)
             min = i.second;
         }
     }
-    return {max, min};
+    return {(max+1)/2, (min+1)/2};
 }
 
 int main()
 {
     fstream ifs("input");
 
-    list<char> Polymer;
+    tPolymer Polymer;
     tInstructions Instructions;
     string Input;
     while(!ifs.eof())
@@ -70,23 +90,33 @@ int main()
         getline(ifs, Input);
         if(Polymer.size() == 0)
         {
-            for(auto &i : Input)
-                Polymer.push_back(i);
+            for (auto p = next(Input.begin(), 1); p != Input.end(); ++p)
+            {
+                if(Polymer.find({*(p-1), *p}) != Polymer.end())
+                    Polymer[{*(p-1), *p}]++;
+                else
+                    Polymer.insert({{*(p-1), *p},1});
+            }   
         }
         else if (Input == "")
             continue;
         else
-            Instructions.push_back({Input[0],Input[1],Input[6]});
+        {
+            Instructions.insert({Input.substr(0,2), *prev(Input.end(), 1)});
+        }
     }
 
-    for(int i = 0; i < 10; ++i)
+    printPolymer(Polymer);
+    for(int i = 0; i < 40; ++i)
     {
-        cout << i << endl;
-        doInsertion(Polymer, Instructions);
+        cout << "Iteration " << i << endl;
+        doInsertionRound(Polymer, Instructions);
+        printPolymer(Polymer);
     }
 
     auto Common =  getMostLeastCommon(Polymer);
     cout << "Most common: " << Common.first << ", least common: " << Common.second << endl;
     cout << "Result = " << Common.first - Common.second << endl;
-    return 0;
+
+   return 0;
 }
