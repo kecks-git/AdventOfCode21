@@ -10,12 +10,13 @@
 
 using namespace std;
 using Matrix = vector<vector<int>>;
+using Point = pair<int,int>;
 
 Matrix Chiton;
-Matrix Output;
+Matrix Dist;
 Matrix Visited;
 
-int Size = 50;
+int Size = 500;
 
 void printMatrix(Matrix& Matrix)
 {
@@ -31,51 +32,60 @@ void printMatrix(Matrix& Matrix)
     return;
 }
 
-bool getShortestPath(int x, int y, int Cost)
+pair<int, int> minDistance()
 {
-    if(x < 0 || y < 0 || x > Size-1 || y > Size-1)
-        return 0;
-    if(Visited.at(y).at(x) == 0)
+    // Initialize min value
+    int min = INT_MAX;
+    pair<int, int> minIndex {0, 0};
+ 
+    for(int i = 0; i < Size; ++i)
     {
-        Output.at(y).at(x) += Cost;
-        Visited.at(y).at(x) = 1;
+        for(int j = 0; j < Size; ++j)
+        {
+            if (Visited[i][j] == false && Dist[i][j] <= min)
+            {
+                min = Dist[i][j];
+                minIndex = {i, j};
+            }
+        }   
+    }   
+    return minIndex;
+}
+
+bool isNeighbor(Point a, Point b)
+{
+    if(a.first == b.first && abs(a.second - b.second) == 1)
         return 1;
-    }
-    else if(Output.at(y).at(x) > Chiton.at(y).at(x) + Cost)
-    {
-        Output.at(y).at(x) = Chiton.at(y).at(x) + Cost;
+    else if(abs(a.first - b.first) == 1 && a.second == b.second)
         return 1;
-    }
     return 0;
 }
 
-void visitNeighbors(int x, int y)
+void dijkstra()
 {
-    int Cost = Output.at(y).at(x);
-    vector<int> Adj = {-1, 0, 1}; 
-    for(auto &i : Adj)
+    for(int i = 0; i < Size; ++i)
     {
-        for(auto &j : Adj)
+        for(int j = 0; j < Size; ++j)
         {
-            if(!(i==0 && j==0) && (abs(j) - abs(i) != 0))
+            auto u = minDistance();
+
+            Visited[u.first][u.second] = true;
+ 
+            for(int k = 0; k < Size; ++k)
             {
-                try
+                for(int l = 0; l < Size; ++l)
                 {
-                    if(getShortestPath(x+i, y+j, Cost))
-                        visitNeighbors(x+i, y+j);
-                }
-                catch(...)
-                {
+                    if (!Visited[k][l] && isNeighbor(u, {k,l}) && Dist[u.first][u.second] != INT_MAX
+                        && Dist[u.first][u.second] + Chiton[k][l] < Dist[k][l])
+                        Dist[k][l] = Dist[u.first][u.second] + Chiton[k][l];
                 }
             }
         }
     }
-    return;
 }
-
 int main()
 {
-    fstream ifs("SampleInput");
+    fstream ifs("input");
 
     vector<int> Line;
     char in = 0;
@@ -108,22 +118,32 @@ int main()
         for(int k = 0; k < Size/5; ++k)
         {
             for(int j = 0; j < Size; ++j)
-                Chiton[i*10+k][j] = (Chiton[i*10+k][j]-1+i)%9+1;
+                Chiton[i*100+k][j] = (Chiton[i*100+k][j]-1+i)%9+1;
         }
+    }
+    for(int i = 0; i < 5; ++i)
+    {
+        for(int j = 0; j < 5; ++j)
+            cout << Chiton.at(i*100).at(j*100) << endl;
+        cout << endl;
     }
 
     cout << Chiton.size() << " " << Chiton[0].size() << endl;
-    //printMatrix(Chiton);
     Chiton.at(0).at(0) = 0;
-    Output = Chiton;
+    Dist = Chiton;
     Visited = Chiton;
     for(auto &i : Visited)
     {
         fill(i.begin(), i.end(), 0); 
     }
+    for(auto &i : Dist)
+    {
+        fill(i.begin(), i.end(), INT_MAX); 
+    }
+    Dist.at(0).at(0) = 0;
 
-    visitNeighbors(0, 0);
+    dijkstra();
 
-    cout << Output.at(Size-1).at(Size-1);
+    cout << Dist.at(Size-1).at(Size-1) << endl;
     return 0;
 }
